@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Login from "./components/auth/login";
 import Register from "./components/auth/Register";
-import ForgotPassword from "./components/auth/Register";
+//import ForgotPassword from "./components/auth/ForgotPassword";
 import "./App.css";
 import Card from "./components/Card";
 import Form from "./components/Form";
@@ -20,22 +20,32 @@ export default function App() {
   // Estado para saber si está logueado o no
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const [currentScreen, setCurrentScreen] = useState("login");
-  const [token, setToken] = useState(null);
+  // Controla vista de "login" o "register"
+  const [authMode, setAuthMode] = useState("login"); 
 
-  // 👇 Control de navegación
-  const goTo = (screen) => setCurrentScreen(screen);
+  // Controla qué vista de(feed, form, preview, detail...)
+  const [currentView, setCurrentView] = useState("feed");
+
 
   const handleLoginSuccess = (userToken) => {
-    setToken(userToken);
-    setCurrentScreen("feed");
-  };  
+
+  localStorage.setItem("token", userToken);
+
+  setIsLoggedIn(true);
+  setCurrentView("feed"); 
+  setSidebarOpen(false);
+};
+  
+ //inicio el login guardando el token el localStorage asi cuando recargue la pagina no me toca iniciar sesion una y otra vez
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        setIsLoggedIn(true);
+      }
+    }, []);
 
   // Estado para controlar si el sidebar (menú lateral) está abierto o cerrado
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Controla qué vista se está mostrando (feed, form, preview, detail...)
-  const [currentView, setCurrentView] = useState("feed");
 
   // Mensajes temporales (ej: confirmaciones rápidas de borrado)
   const [message, setMessage] = useState(null);
@@ -103,7 +113,11 @@ export default function App() {
 
   // Aquí va el return condicional
   if (!isLoggedIn) {
-    return <Login onLoginSuccess={() => setIsLoggedIn(true)} />; 
+    return authMode === "login" ? (
+    <Login onLoginSuccess={handleLoginSuccess} goRegister={() => setAuthMode("register")} />
+  ) : (
+    <Register goLogin={() => setAuthMode("login")} />
+  );
   }
 
 
@@ -123,7 +137,8 @@ const openDetail = (article) => {
   setCurrentView("detail");
 };
 
-// Maneja el envío del formulario (no guarda, solo prepara vista previa)
+
+// prepara la vista previa del formulario
 const handleSubmit = (e) => {
   e.preventDefault();
 
@@ -140,84 +155,94 @@ const handleSubmit = (e) => {
   setCurrentView("preview");
 };
 
+// Función que valida que un id sea si un id viene de mongo o no
+const isMongoId = (id) => /^[0-9a-fA-F]{24}$/.test(id);// Función de ayuda
+
+
 // Confirma la creación y edición de un artículo
 const handleConfirm = async () => {
   console.log("entrando a handleConfirm con:", previewArticle);
 
   // Si el artículo es DEMO (ejemplo local), solo actualiza el estado local
   if (isDemo(previewArticle)) {
-      setArticlesDemo(prev =>
-        prev.map(a => (a.id === previewArticle.id ? previewArticle : a))
-      );
-      setPreviewArticle(null);
-      setFormData({ nombre: "", descripcion: "", imagenUrl: "" });
-      setToast("Artículo demo actualizado localmente 🔄");
-      setTimeout(() => setToast(null), 3000);
-      setCurrentView("feed");
-      return; // se corta para que no pase al backend
-    }
-    
-    try {
-    // Separamos los ids para evitar conflictos con el backend
-    const { id, idArticulos, ...articleWithoutId } = previewArticle;
+    console.log("Editando artículo DEMO:", previewArticle.id);
+    setArticlesDemo((prev) =>
+      prev.map((a) => (a.id === previewArticle.id ? previewArticle : a))
+    );
+    setPreviewArticle(null);
+    setFormData({ nombre: "", descripcion: "", imagenUrl: "" });
+    setToast("Artículo Demo actualizado🔄");
+    setTimeout(() => setToast(null), 3000);
+    setCurrentView("feed");
+    return; // se corta para que no pase al backend
+  }
 
-    // Construimos el objeto que se manda al backend
-    const articuloConUsuario = {
-      ...articleWithoutId,
-      idArticulos, // mantener el id para que el backend sepa que se está editando
-      usuarioPropietario: { idUsuario: 1 }, // Usuario fijo que tengo agregado en mi base de datos para pruebas de este modulo "gestion de articulos"
-      disponible: true,
-      precio: articleWithoutId.precio || 0,
-      tipoAccion: articleWithoutId.tipoAccion || "venta",
-      fechaPublicacion: new Date().toISOString().split("T")[0], // Solo fecha sin HORA (YYYY-MM-DD)
-    };
+  try {
+    const { id, _id, ...articleWithoutId } = previewArticle;
+    const backendId = _id || id;
+    const token = localStorage.getItem("token");
 
     let updatedOrCreated;
 
-    if (idArticulos) {
-      // Si tiene id del backend -> EDITAR
-      console.log("Editando artículo con id:", idArticulos);
-      updatedOrCreated = await updateArticulo(idArticulos, articuloConUsuario);
+     // "/^[0-9a-fA-F]{24}$/.test(id)" valida que id es un ObjectId válido de Mongo
 
-      // Normalizar fecha para que no incluya hora
-      if (updatedOrCreated.fechaPublicacion) {
-        updatedOrCreated.fechaPublicacion = updatedOrCreated.fechaPublicacion.split("T")[0];
-  }
+    if (backendId && isMongoId(backendId)) {
+      // EDITAR
+      console.log("Editando artículo con id:", backendId);
 
-      // Reemplaza el artículo editado en la lista
-      setArticlesBackend(
-        articlesBackend.map((art) =>
-          art.idArticulos === idArticulos ? updatedOrCreated : art
-        )
+      updatedOrCreated = await updateArticulo(backendId, articleWithoutId, token);
+
+      //  Actualizar en el estado local
+      setArticlesBackend((prev) =>
+        prev.map((a) => (a.id === backendId ? updatedOrCreated : a))
+
       );
+      
+      setToast("Artículo actualizado 🔄");
+      setTimeout(() => setToast(null), 3000);
 
-      setPreviewArticle(null);
-      setFormData({ nombre: "", descripcion: "", imagenUrl: "" });
-
-      setToast("Artículo actualizado exitosamente ✨");
+      
     } else {
-      // Si no tiene id del backend -> CREAR nuevo
+      // CREAR
       console.log("Creando artículo nuevo");
-      updatedOrCreated = await createArticulo(articuloConUsuario);
-      setArticlesBackend([updatedOrCreated, ...articlesBackend]);
-      setToast("Artículo añadido exitosamente ✅");
+      
+
+      updatedOrCreated = await createArticulo(articleWithoutId, token);
+
+      setArticlesBackend((prev) => [...prev, updatedOrCreated]);
+
+      setToast("Artículo agregado con EXITO ✅");
+      setTimeout(() => setToast(null), 3000);
     }
 
-    // Limpiamos estados y volvemos al feed
+
+    // Limpiar estados
     setPreviewArticle(null);
     setFormData({ nombre: "", descripcion: "", imagenUrl: "" });
-    setTimeout(() => setToast(null), 5000);
     setCurrentView("feed");
   } catch (error) {
     console.error("Error en handleConfirm:", error);
   }
 };
 
-// Borra un artículo que estaba en modo "preview" (todavía no creado en el backend)
-const handleDeletePreview = () => {
+
+// vuelve al formulario estando en "preview" 
+const CorrectPreview = () => {
   setPreviewArticle(null); // Limpia el artículo en preview
   setCurrentView("form");  // Vuelve a la vista del formulario
 };
+
+const handleDeletePreview = () => {
+  if (window.confirm("¿Seguro quieres borrar este artículo?")) {
+    setSelectedArticle(null);// limpia el artículo en preview
+    setFormData({ nombre: "", descripcion: "", imagenUrl: "" });
+    setCurrentView("feed");
+  } else {
+    // no hace nada, sigue editando
+    console.log("Canceló el borrado");
+  }
+};
+
 
 // Borra un artículo ya creado (puede ser demo o del backend)
 const handleDeleteDirecto = async (id) => {
@@ -236,13 +261,8 @@ const handleDeleteDirecto = async (id) => {
         await deleteArticulo(id); 
 
         // Luego actualiza el estado local eliminando ese artículo
-        setArticlesBackend((prev) => {
-          console.log("Antes de borrar:", prev);
-          const actualizados = prev.filter((a) => a.idArticulos !== id);
-          
-          console.log("Después de borrar:", actualizados);
-          return actualizados;
-        });
+
+          setArticlesBackend((prev) => prev.filter((a) => a.id !== id));
       } catch (error) {
         console.error("Error eliminando artículo:", error);
       }
@@ -256,7 +276,7 @@ const handleDeleteDirecto = async (id) => {
 
 // Maneja una acción sobre un artículo (comprar, recibir o intercambiar)
 const handleAction = async (art) => {
-  const id = art.idArticulos ?? art.id; // Usa idArticulos si existe, si no usa id
+  const id = art.id; // Usa idArticulos si existe, si no usa id
   const label = 
     art.tipoAccion === "venta" 
       ? "comprar" 
@@ -275,8 +295,8 @@ const handleAction = async (art) => {
     const resp = await updateArticulo(id, updated);
 
     // Reemplaza el artículo en el estado local con la respuesta del backend
-    setArticlesBackend(prev => 
-      prev.map(a => ((a.idArticulos ?? a.id) === (resp.idArticulos ?? resp.id) ? resp : a))
+    setArticlesBackend((prev) =>
+      prev.map((a) => (a.id === resp.id ? resp : a))
     );
 
     // Muestra un mensaje de éxito temporal
@@ -285,6 +305,7 @@ const handleAction = async (art) => {
 
     // Regresa a la vista principal
     setCurrentView("feed");
+
   } catch (err) {
     console.error("Error acción:", err);
   }
@@ -295,19 +316,20 @@ const allArticles = [...articlesDemo, ...articlesBackend];
 
 
   return (
+  <div className="page">
   <div>
-    {/*para mostrar Pantalla de LOGIN */}
-    {currentScreen === "login" && (
-      <Login goTo={goTo} onLoginSuccess={handleLoginSuccess} />
-    )}
-
-    {/* {currentScreen === "forgot" && <ForgotPassword goTo={goTo} />} */}
-
-    {/* Pantalla de REGISTRO */}
-    {currentScreen === "register" && <Register goTo={goTo} />}
-
-    {/* Pantalla de FEED (todo  va aquí) */}
-    {currentScreen === "feed" && (
+    {/* Si NO está logueado → mostrar login o register */}
+    {!isLoggedIn ? (
+      authMode === "login" ? (
+        <Login
+          onLoginSuccess={handleLoginSuccess}
+          goRegister={() => setAuthMode("register")}
+        />
+      ) : (
+        <Register goLogin={() => setAuthMode("login")} />
+      )
+    ) : (
+      /* Si está logueado → mostrar FEED y resto de la app */
       <>
         {/* HEADER y SIDEBAR solo aparecen si NO estamos en la vista de detalle */}
         {currentView !== "detail" && (
@@ -329,8 +351,8 @@ const allArticles = [...articlesDemo, ...articlesBackend];
                 <li>Solicitudes</li>
                 <li>Perfil</li>
                 <li onClick={() => setCurrentView("form")}>Publicar artículo</li>
-                <li onClick={() => setCurrentScreen("login")}>
-                      Cerrar sesión
+                <li onClick={() => {localStorage.removeItem('token');setIsLoggedIn(false);setAuthMode("login");}}>
+                  Cerrar sesión
                     </li>
               </ul>
             </div>
@@ -338,7 +360,7 @@ const allArticles = [...articlesDemo, ...articlesBackend];
         )}
 
         {/* CONTENIDO PRINCIPAL */}
-        <main style={{ marginTop: "8px" }}>
+        <main className="content">
           {/* Vista principal: lista de artículos */}
           {currentView === "feed" && (
             <>
@@ -370,7 +392,8 @@ const allArticles = [...articlesDemo, ...articlesBackend];
             <Preview
               article={previewArticle}
               onConfirm={handleConfirm} // confirmar publicación
-              onDelete={handleDeletePreview} // descartar borrador
+              onBack={CorrectPreview} // descartar borrador
+              onDelete={handleDeletePreview} // volver al feed
             />
           )}
 
@@ -378,15 +401,13 @@ const allArticles = [...articlesDemo, ...articlesBackend];
           {currentView === "detail" && selectedArticle && (
             <ArticleDetail
               article={selectedArticle}
-              onBack={() => { setSelectedArticle(null); setCurrentView("feed"); }} // volver al feed
+              onAtras={() => { setSelectedArticle(null); setCurrentView("feed"); }} // volver al feed
               onEdit={(art) => {
                 // Prepara el formulario con los datos del artículo seleccionado
                 setFormData({
                   nombre: art.nombre,
                   descripcion: art.descripcion,
-                  imagenUrl: art.imagenUrl,
-                  precio: art.precio,
-                  tipoAccion: art.tipoAccion,
+                  imagenUrl: art.imagenUrl
                 });
 
                 // Guardamos el artículo como preview para mantener id
@@ -407,6 +428,7 @@ const allArticles = [...articlesDemo, ...articlesBackend];
         <footer>© 2025 Stanew - Exchange · Sale · Donation</footer>
         </>
     )}  
+  </div>
   </div>
 );
 }
