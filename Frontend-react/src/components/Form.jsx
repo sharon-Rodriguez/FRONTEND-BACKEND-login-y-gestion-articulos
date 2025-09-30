@@ -1,8 +1,9 @@
 export default function Form({ formData, onChange, onSubmit }) {
     return (
-    <form className="formulario" onSubmit={onSubmit}>
+    <div className="form-page">
+    < form className="formulario" onSubmit={onSubmit}>
         <h2>Publicar artículo</h2>
-        <input
+        <input className="formInput"
         type="text"
         name="nombre"
         placeholder="nombre del articulo"
@@ -10,14 +11,14 @@ export default function Form({ formData, onChange, onSubmit }) {
         onChange={onChange}
         required
     />
-    <textarea
+    <textarea className="formInput"
         name="descripcion"
         placeholder="Descripción"
-        value={formData.description}
+        value={formData.descripcion}
         onChange={onChange}
         required
     />
-    <input
+    <input className="formInput"
         type="text"
         name="imagenUrl"
         placeholder="URL de la imagen"
@@ -27,6 +28,7 @@ export default function Form({ formData, onChange, onSubmit }) {
     />
     <button className="guardar" type="submit">Guardar</button>
     </form>
+    </div>
     );
 }
 

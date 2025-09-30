@@ -10,10 +10,10 @@ export default function Preview({ article, onConfirm, onDelete,onBack}) {
             <p>{article.descripcion}</p>
         </div>
     </div>
-{/* Botones de acción: confirmar publicación o eliminar */}
-    <div>
-        <button onClick={onConfirm}>Confirmar</button>
-        <button onClick={onDelete} style={{ background: "#c0392b" }}>Corregir borrador</button>
+    <div className="contenedorBtnPreview">
+        <button className="botonesPreview prevBack" onClick={onBack} >Atras</button>
+        <button className="botonesPreview prevConfirm" onClick={onConfirm}>Confirmar</button>
+        <button className="botonesPreview prevBorrar" onClick={onDelete}>borrar</button>
     </div>
     </div>
     );

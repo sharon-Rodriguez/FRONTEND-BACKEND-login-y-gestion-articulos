@@ -1,6 +1,4 @@
-import React from "react";
-
-export default function ArticleDetail({ article, onBack, onEdit, onAction }) {
+export default function ArticleDetail({ article, onAtras, onEdit, onAction }) {
     if (!article) return null;
 
 const actionLabel =
@@ -24,7 +22,7 @@ const actionLabel =
             <div className="detail-top">
             <h1 className="detail-title">{article.nombre}</h1>
             <div className="detail-meta">
-                {article.precio ? <div className="price">₡ {article.precio}</div> : null}
+                {article.precio ? <div className="price">$ {article.precio}</div> : null}
             <div className="type">{article.tipoAccion}</div>
             </div>
         </div>
@@ -38,7 +36,7 @@ const actionLabel =
         </div>
 
         <div className="detail-actions">
-            <button className="btn secondary" onClick={onBack}>Volver</button>
+            <button className="btn secondary" onClick={onAtras}>Volver</button>
             <button className="btn outline" onClick={() => onEdit(article)}>Editar</button>
             <button className="btn primary" onClick={() => onAction(article)}>{actionLabel}</button>
         </div>
