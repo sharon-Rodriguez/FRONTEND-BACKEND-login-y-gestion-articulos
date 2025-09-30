@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/auth"; // Ajusta el puerto si usas otro
+const API_URL = "http://localhost:4000/api/auth"; 
 
 export async function registerUser(userData) {
 const res = await fetch(`${API_URL}/register`, {
@@ -7,8 +7,14 @@ const res = await fetch(`${API_URL}/register`, {
     body: JSON.stringify(userData),
 });
 
-    if (!res.ok) throw new Error("Error en registro");
-    return res.json();
+const data = await res.json(); // siempre parseamos la respuesta
+
+    if (!res.ok) {
+        console.log("❌ Error del backend:", data);
+        throw data;
+    }
+
+    return data;
 }
 
 export async function loginUser(credentials) {
@@ -18,6 +24,11 @@ const res = await fetch(`${API_URL}/login`, {
     body: JSON.stringify(credentials),
 });
 
-    if (!res.ok) throw new Error("Error en login");
-    return res.json();
+const data = await res.json(); // siempre parsea la respuesta
+
+    if (!res.ok) {
+        throw data;
+    }
+    
+    return data;
 }
