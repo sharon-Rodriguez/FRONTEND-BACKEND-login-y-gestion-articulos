@@ -4,8 +4,8 @@ const articleSchema = new mongoose.Schema({
     nombre: { type: String, required: true },
     descripcion: { type: String },
     imagenUrl: { type: String },
-    precio: { type: Number },
-    tipoAccion: { type: String, enum: ["venta", "donacion", "intercambio"], required: true },
+    precio: { type: Number, default: 35000 },
+    tipoAccion: { type: String, enum: ["venta", "donacion", "intercambio"], required: true, default:"donacion" },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
 }, { timestamps: true });
 
