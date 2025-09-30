@@ -27,12 +27,12 @@ El objetivo es aprender y mejorar mis habilidades con **Node.js, Express, MongoD
 ## 📸 Vista previa
 
 ### 🔑 Login y Registro
-| Registro correcto | Error en login |
+| Error en login | Registro correcto |
 |----------------|----------------|
 | ![Error login](./screenshots/login.png) | ![Registro correcto](./screenshots/registroExito.png) |
 
 ### 📦 Gestión de Artículos (CRUD)
-| Vista de artículos | Formulario crear/editar |
+| Formulario crear/editar | Vista de artículos |
 |--------------------|--------------------------|
 | ![Formulario artículo](./screenshots/form.png) | ![Vista de artículos](./screenshots/crear.png) |
 
