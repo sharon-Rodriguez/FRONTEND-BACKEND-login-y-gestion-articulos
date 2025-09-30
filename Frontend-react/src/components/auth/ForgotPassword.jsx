@@ -1,17 +1,18 @@
 import React from "react";
-
+import styles from "./login.module.css";
 export default function ForgotPassword({ goTo, validateForgot }) {
 return (
-    <div className="screen" id="forgot">
-    <div className="contenedor_mayor">
-        <div className="del_logo">
+    <div className={styles.auth}>
+    <div className={styles.screen} id="forgot">
+    <div className={styles.contenedor_mayor}>
+        <div className={styles.del_logo}>
         <img src="logo.png" alt="Stanew logo" />
         <h1>STANEW</h1>
-        <p className="slogan">INTERCAMBIO · VENTA · DONACIÓN</p>
+        <p className={styles.slogan}>INTERCAMBIO · VENTA · DONACIÓN</p>
         </div>
 
         <form
-        className="formulario"
+        className={styles.formulario}
         onSubmit={(e) => {
             e.preventDefault();
             validateForgot();
@@ -29,6 +30,7 @@ return (
             Volver al login
         </button>
         </form>
+    </div>
     </div>
     </div>
 );

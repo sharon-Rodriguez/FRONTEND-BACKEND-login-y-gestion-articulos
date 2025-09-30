@@ -1,0 +1,139 @@
+.auth * {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    box-sizing: border-box;
+}
+
+.auth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f6f6f6;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Pantallas */
+
+.screenActive {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Caja principal */
+.contenedor_mayor {
+    background: white;
+    padding: 10px 40px ;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    min-width: 400px;
+    width: 100%;
+    min-height: 600px;
+}
+
+/* Logo y slogan */
+.del_logo img {
+    margin-top: 40px;
+    width: 120px;
+}
+
+.del_logo h1 {
+    color: #222;
+    font-size: 25px;
+    font-weight: bolder;
+}
+
+.slogan {
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 2px;
+    margin-top: 5px;
+    margin-bottom: 50px ;
+}
+
+/* Formulario */
+.formulario input {
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+.formulario input::placeholder {
+    font-size: 13px;  
+    font-style: italic;
+    color: #aaa;    
+}
+
+
+input:focus {
+    transition: 0.3s;
+    outline: none;   
+    border-color: #989898;
+}
+
+.boton {
+    width: 100%;
+    background: #d3891a;
+    color: white;
+    padding: 12px 40px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    margin-top: 15px;
+    margin-bottom: 65px;
+}
+
+.boton:hover {
+    background-color: #be7514;
+}
+
+/* Errores */
+.mensajeError {
+    padding: 0 12px;
+    color: rgba(230, 38, 38, 0.906);
+    font-size: 11px;
+    font-style: italic;
+    display: block;
+    text-align: left;
+}
+
+.mensajeGlobal {
+    color: rgba(230, 38, 38, 0.906);
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+}
+
+.error {
+    border: 1px solid rgba(245, 78, 78, 0.7) !important;
+}
+
+.enlaceSolo {
+    position: absolute; bottom: 50px ;
+    margin-left: 116px;
+    align-items: center;
+}
+
+.linkButton {
+    margin: 8px auto;
+    display: block;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.linkButton:hover {
+    text-decoration: none;
+    background: none; /* evita efecto de botón */
+    text-decoration: underline;
+}
