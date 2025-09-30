@@ -98,15 +98,22 @@ input:focus {
 /* Errores */
 .mensajeError {
     padding: 0 12px;
-    color: rgba(230, 38, 38, 0.906);
+    color: #e62626e7;
     font-size: 11px;
     font-style: italic;
     display: block;
     text-align: left;
 }
 
+.mensajeGlobalExito{
+    color: #2ecc71;
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+}
+
 .mensajeGlobal {
-    color: rgba(230, 38, 38, 0.906);
+    color: #e62626e7;
     font-size: 14px;
     font-style: italic;
     text-align: center;

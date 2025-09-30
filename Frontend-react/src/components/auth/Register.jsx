@@ -9,7 +9,7 @@ const [form, setForm] = useState({
     password: "",
 });
 
-const [mensaje, setMensaje] = useState(""); //  estado para mostrar mensajes 
+const [mensajeExito, setMensajeExito] = useState(""); //  estado para mostrar mensajes 
 
 const [globalError, setGlobalError] = useState("");
 
@@ -69,7 +69,7 @@ const handleSubmit = async (e) => { e.preventDefault();
 
     try {
       const data = await registerUser(form); // Llamada al backend
-        setMensaje("✅ Usuario registrado con éxito");
+        setMensajeExito("✅ Usuario registrado con éxito");
 
         console.log("Respuesta backend:", data);
 
@@ -123,9 +123,9 @@ return (
 
         < form className={styles.formulario} onSubmit={handleSubmit}>
 
-        {mensaje && (
-        <div className={styles.mensajeGlobal}>
-        {mensaje}
+        {mensajeExito && (
+        <div className={styles.mensajeGlobalExito}>
+        {mensajeExito}
         </div>
         )}
 
